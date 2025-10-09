@@ -224,6 +224,8 @@ type ObjectInfo struct {
 	TransitionedObjName string
 	TransitionTier      string
 	TransitionStatus    string
+	// AccessTime represents the last access time of the object
+	AccessTime time.Time `json:"accessTime"`
 	/*trinet*/
 
 	// Checksum values

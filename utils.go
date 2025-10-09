@@ -382,7 +382,18 @@ func ToObjectInfo(bucketName, objectName string, h http.Header) (ObjectInfo, err
 		TransitionTier:      h.Get("x-amz-Transitioned-Obj-Tier"),
 		TransitionStatus:    h.Get("x-amz-Transitioned-Obj-Status"),
 		/*trinet*/
-		
+		// Parse access time if exists
+		AccessTime: func() time.Time {
+			if at := h.Get("X-Minio-Access-Time"); at != "" {
+				t, err := time.Parse(http.TimeFormat, at)
+				if err == nil {
+					return t
+				}
+			}
+			return time.Time{}
+		}(),
+		/*trinet*/
+
 		// Checksum values
 		ChecksumCRC32:  h.Get("x-amz-checksum-crc32"),
 		ChecksumCRC32C: h.Get("x-amz-checksum-crc32c"),

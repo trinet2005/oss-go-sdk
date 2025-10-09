@@ -332,6 +332,29 @@ func (b ExpirationBoolean) IsEnabled() bool {
 	return bool(b)
 }
 
+/* trinet */
+type AccessTime struct {
+	XMLName xml.Name `xml:"AccessTime"`
+	// MinimumMinutes specifies the minimum number of minutes that must have passed since the last access
+	MinimumMinutes int `xml:"MinimumMinutes"`
+}
+
+// IsNull returns true if MinimumMinutes is 0
+func (a AccessTime) IsNull() bool {
+	return a.MinimumMinutes == 0
+}
+
+// MarshalXML is accessTime is non null
+func (a AccessTime) MarshalXML(en *xml.Encoder, startElement xml.StartElement) error {
+	if a.IsNull() {
+		return nil
+	}
+	type accessTimeWrapper AccessTime
+	return en.EncodeElement(accessTimeWrapper(a), startElement)
+}
+
+/* trinet */
+
 // Expiration structure - expiration details of lifecycle configuration
 type Expiration struct {
 	XMLName      xml.Name           `xml:"Expiration,omitempty" json:"-"`
@@ -404,6 +427,9 @@ func (r Rule) MarshalJSON() ([]byte, error) {
 		Prefix                         string                          `json:"Prefix,omitempty"`
 		Status                         string                          `json:"Status"`
 		Transition                     *Transition                     `json:"Transition,omitempty"`
+		/* trinet */
+		AccessTime *AccessTime `json:"AccessTime,omitempty"`
+		/* trinet */
 	}
 	newr := rule{
 		Prefix: r.Prefix,
@@ -429,6 +455,11 @@ func (r Rule) MarshalJSON() ([]byte, error) {
 	if !r.NoncurrentVersionTransition.isNull() {
 		newr.NoncurrentVersionTransition = &r.NoncurrentVersionTransition
 	}
+	/* trinet */
+	if !r.AccessTime.IsNull() {
+		newr.AccessTime = &r.AccessTime
+	}
+	/* trinet */
 
 	return json.Marshal(newr)
 }
@@ -445,6 +476,10 @@ type Rule struct {
 	Prefix                         string                         `xml:"Prefix,omitempty" json:"Prefix,omitempty"`
 	Status                         string                         `xml:"Status" json:"Status"`
 	Transition                     Transition                     `xml:"Transition,omitempty" json:"Transition,omitempty"`
+	/* trinet */
+	// AccessTime rule specifies how long an object must be unaccessed before lifecycle actions can be taken
+	AccessTime AccessTime `xml:"AccessTime,omitempty" json:"AccessTime,omitempty"`
+	/* trinet */
 }
 
 // Configuration is a collection of Rule objects.
